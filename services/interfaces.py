@@ -1,4 +1,8 @@
 from abc import ABC, abstractmethod
+from typing import Sequence
+
+from models.dish import Dish
+from models.user import User
 
 
 class AbstractDishService(ABC):
@@ -7,7 +11,7 @@ class AbstractDishService(ABC):
         pass
 
     @abstractmethod
-    async def get_dishes(self):
+    async def get_dishes(self) -> Sequence[Dish]:
         pass
 
     @abstractmethod
@@ -21,7 +25,7 @@ class AbstractUserService(ABC):
         pass
 
     @abstractmethod
-    async def get_users(self):
+    async def get_users(self) -> Sequence[User]:
         pass
 
     @abstractmethod

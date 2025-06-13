@@ -75,13 +75,24 @@ class TelegramDishController:
         await state.clear()
 
     async def show_dishes(self, message: Message) -> None:
-        rows = await self.dish_service.get_dishes()
-        if not rows:
+        dishes = await self.dish_service.get_dishes()
+        if not dishes:
             await message.answer("Список блюд пуст.")
             return
-        for dish_id, dish_name in rows:
-            kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Удалить", callback_data=f"delete_{dish_id}"), InlineKeyboardButton(text="\u2795 Добавить", callback_data="add_dish_inline")]])
-            await message.answer(f"{dish_id}. {dish_name}", reply_markup=kb)
+        for dish in dishes:
+            kb = InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [
+                        InlineKeyboardButton(
+                            text="Удалить", callback_data=f"delete_{dish.id}"
+                        ),
+                        InlineKeyboardButton(
+                            text="\u2795 Добавить", callback_data="add_dish_inline"
+                        ),
+                    ]
+                ]
+            )
+            await message.answer(f"{dish.id}. {dish.name}", reply_markup=kb)
 
     async def delete_dish(self, callback: CallbackQuery) -> None:
         dish_id = int(callback.data.split("_")[1])

@@ -1,3 +1,6 @@
+from typing import Sequence
+
+from models.dish import Dish
 from reposotory.interfaces import AbstractDishRepository
 from services.interfaces import AbstractDishService
 
@@ -9,7 +12,7 @@ class DishService(AbstractDishService):
     async def add_dish(self, name: str, author_id: int) -> None:
         await self.repository.add_dish(name)
 
-    async def get_dishes(self):
+    async def get_dishes(self) -> Sequence[Dish]:
         return await self.repository.get_dishes()
 
     async def delete_dish(self, dish_id: int) -> None:

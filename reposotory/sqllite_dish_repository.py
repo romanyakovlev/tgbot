@@ -1,5 +1,7 @@
 import aiosqlite
 
+from models.dish import Dish
+from models.user import User
 from .interfaces import AbstractDishRepository
 
 
@@ -44,12 +46,14 @@ class SqlliteDishRepository(AbstractDishRepository):
             await db.execute("DELETE FROM dishes WHERE id = ?", (dish_id,))
             await db.commit()
 
-    async def get_dishes(self):
+    async def get_dishes(self) -> list[Dish]:
         async with aiosqlite.connect(self.db_file) as db:
             async with db.execute("SELECT id, name FROM dishes") as cursor:
-                return await cursor.fetchall()
+                rows = await cursor.fetchall()
+        return [Dish(id=row[0], name=row[1]) for row in rows]
 
-    async def get_users(self):
+    async def get_users(self) -> list[User]:
         async with aiosqlite.connect(self.db_file) as db:
             async with db.execute("SELECT user_id FROM users") as cursor:
-                return await cursor.fetchall()
+                rows = await cursor.fetchall()
+        return [User(user_id=row[0]) for row in rows]
