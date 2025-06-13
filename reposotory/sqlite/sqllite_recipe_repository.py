@@ -1,10 +1,10 @@
 import aiosqlite
 
-from models.dish import Dish
-from ..interfaces import AbstractDishRepository
+from models.recipe import Recipe
+from ..interfaces import AbstractRecipeRepository
 
 
-class SqlliteDishRepository(AbstractDishRepository):
+class SqlliteRecipeRepository(AbstractRecipeRepository):
     def __init__(self, db_file: str) -> None:
         self.db_file = db_file
 
@@ -12,7 +12,7 @@ class SqlliteDishRepository(AbstractDishRepository):
         async with aiosqlite.connect(self.db_file) as db:
             await db.execute(
                 """
-                CREATE TABLE IF NOT EXISTS dishes (
+                CREATE TABLE IF NOT EXISTS recipes (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL
                 )
@@ -20,18 +20,18 @@ class SqlliteDishRepository(AbstractDishRepository):
             )
             await db.commit()
 
-    async def add_dish(self, name: str) -> None:
+    async def add_recipe(self, name: str) -> None:
         async with aiosqlite.connect(self.db_file) as db:
-            await db.execute("INSERT INTO dishes (name) VALUES (?)", (name,))
+            await db.execute("INSERT INTO recipes (name) VALUES (?)", (name,))
             await db.commit()
 
-    async def delete_dish(self, dish_id: int) -> None:
+    async def delete_recipe(self, recipe_id: int) -> None:
         async with aiosqlite.connect(self.db_file) as db:
-            await db.execute("DELETE FROM dishes WHERE id = ?", (dish_id,))
+            await db.execute("DELETE FROM recipes WHERE id = ?", (recipe_id,))
             await db.commit()
 
-    async def get_dishes(self) -> list[Dish]:
+    async def get_recipes(self) -> list[Recipe]:
         async with aiosqlite.connect(self.db_file) as db:
-            async with db.execute("SELECT id, name FROM dishes") as cursor:
+            async with db.execute("SELECT id, name FROM recipes") as cursor:
                 rows = await cursor.fetchall()
-        return [Dish(id=row[0], name=row[1]) for row in rows]
+        return [Recipe(id=row[0], name=row[1]) for row in rows]

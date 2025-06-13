@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
-class Dish(BaseModel):
+class Recipe(BaseModel):
     id: int
     name: str

@@ -1,25 +1,25 @@
 from abc import ABC, abstractmethod
 from typing import Sequence
 
-from models.dish import Dish
+from models.recipe import Recipe
 from models.user import User
 
 
-class AbstractDishRepository(ABC):
+class AbstractRecipeRepository(ABC):
     @abstractmethod
     async def init_db(self) -> None:
         pass
 
     @abstractmethod
-    async def add_dish(self, name: str) -> None:
+    async def add_recipe(self, name: str) -> None:
         pass
 
     @abstractmethod
-    async def delete_dish(self, dish_id: int) -> None:
+    async def delete_recipe(self, recipe_id: int) -> None:
         pass
 
     @abstractmethod
-    async def get_dishes(self) -> Sequence[Dish]:
+    async def get_recipes(self) -> Sequence[Recipe]:
         pass
 
 
