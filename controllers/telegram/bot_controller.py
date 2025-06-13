@@ -11,6 +11,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 
 from services.interfaces import AbstractRecipeService, AbstractUserService
+from exceptions import UserAlreadyExistsError
 
 
 class AddRecipe(StatesGroup):
@@ -29,9 +30,12 @@ class TelegramBotController:
         self.dp.callback_query(F.data == "add_recipe_inline")(self.inline_add_recipe)
 
     async def track_user(self, message: Message, state: FSMContext) -> None:
-        await self.user_service.add_user_if_needed(
-            message.from_user.id, message.from_user.username
-        )
+        try:
+            await self.user_service.add_user_if_needed(
+                message.from_user.id, message.from_user.username
+            )
+        except UserAlreadyExistsError:
+            pass
         current_state = await state.get_state()
         if current_state == AddRecipe.waiting_for_name.state:
             await self.receive_recipe_name(message, state)
@@ -113,8 +117,11 @@ class TelegramBotController:
         except ValueError:
             await message.answer("Некорректный id")
             return
-        await self.user_service.add_user_if_needed(user_id, None)
-        await message.answer(f"Пользователь {user_id} добавлен")
+        try:
+            await self.user_service.add_user_if_needed(user_id, None)
+            await message.answer(f"Пользователь {user_id} добавлен")
+        except UserAlreadyExistsError:
+            await message.answer("Пользователь уже зарегистрирован")
 
     async def cmd_delete_user(self, message: Message) -> None:
         if not await self.user_service.is_admin(message.from_user.id):

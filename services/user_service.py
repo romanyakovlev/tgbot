@@ -3,6 +3,7 @@ from typing import Sequence
 from models.user import User
 from reposotory.interfaces import AbstractUserRepository
 from services.interfaces import AbstractUserService
+from exceptions import UserAlreadyExistsError
 
 
 class UserService(AbstractUserService):
@@ -14,7 +15,7 @@ class UserService(AbstractUserService):
     ) -> None:
         existing = await self.repository.get_user(user_id)
         if existing is not None:
-            is_admin = existing.admin or is_admin
+            raise UserAlreadyExistsError(user_id)
         await self.repository.add_user(user_id, username, is_admin)
 
     async def get_users(self) -> Sequence[User]:

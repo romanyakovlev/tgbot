@@ -11,6 +11,7 @@ from reposotory.sqlite.sqllite_recipe_repository import SqlliteRecipeRepository
 from reposotory.sqlite.sqllite_user_repository import SqlliteUserRepository
 from services.recipe_service import RecipeService
 from services.user_service import UserService
+from exceptions import UserAlreadyExistsError
 
 API_TOKEN = "token"
 DB_FILE = "recipes.db"
@@ -31,7 +32,10 @@ async def main() -> None:
             user_id = int(admin_id)
         except (TypeError, ValueError):
             continue
-        await user_service.add_user_if_needed(user_id, None, is_admin=True)
+        try:
+            await user_service.add_user_if_needed(user_id, None, is_admin=True)
+        except UserAlreadyExistsError:
+            pass
     recipe_service = RecipeService(recipe_repo)
 
     controller = TelegramBotController(dp, recipe_service, user_service)
