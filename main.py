@@ -6,7 +6,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
-from telegram.controllers.bot_controller import TelegramBotController
+from controllers.telegram.bot_controller import TelegramBotController
 from reposotory.sqlite.sqllite_dish_repository import SqlliteDishRepository
 from reposotory.sqlite.sqllite_user_repository import SqlliteUserRepository
 from services.dish_service import DishService
