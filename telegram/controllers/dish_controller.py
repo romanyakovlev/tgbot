@@ -29,7 +29,9 @@ class TelegramDishController:
         self.dp.callback_query(F.data == "add_dish_inline")(self.inline_add_dish)
 
     async def track_user(self, message: Message, state: FSMContext) -> None:
-        await self.user_service.add_user_if_needed(message.from_user.id)
+        await self.user_service.add_user_if_needed(
+            message.from_user.id, message.from_user.username
+        )
         current_state = await state.get_state()
         if current_state == AddDish.waiting_for_name.state:
             await self.receive_dish_name(message, state)
@@ -42,6 +44,10 @@ class TelegramDishController:
             await self.cancel_add(message, state)
         elif message.text and message.text.lower() == "список блюд":
             await self.show_dishes(message)
+        elif message.text and message.text.startswith("/add_user"):
+            await self.cmd_add_user(message)
+        elif message.text and message.text.startswith("/delete_user"):
+            await self.cmd_delete_user(message)
 
     async def cmd_start(self, message: Message) -> None:
         kb = ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[[KeyboardButton(text="Добавить блюдо")], [KeyboardButton(text="Список блюд")]])
@@ -93,6 +99,38 @@ class TelegramDishController:
                 ]
             )
             await message.answer(f"{dish.id}. {dish.name}", reply_markup=kb)
+
+    async def cmd_add_user(self, message: Message) -> None:
+        if not await self.user_service.is_admin(message.from_user.id):
+            await message.answer("Недостаточно прав")
+            return
+        parts = message.text.split()
+        if len(parts) < 2:
+            await message.answer("Используйте /add_user <id>")
+            return
+        try:
+            user_id = int(parts[1])
+        except ValueError:
+            await message.answer("Некорректный id")
+            return
+        await self.user_service.add_user_if_needed(user_id, None)
+        await message.answer(f"Пользователь {user_id} добавлен")
+
+    async def cmd_delete_user(self, message: Message) -> None:
+        if not await self.user_service.is_admin(message.from_user.id):
+            await message.answer("Недостаточно прав")
+            return
+        parts = message.text.split()
+        if len(parts) < 2:
+            await message.answer("Используйте /delete_user <id>")
+            return
+        try:
+            user_id = int(parts[1])
+        except ValueError:
+            await message.answer("Некорректный id")
+            return
+        await self.user_service.delete_user(user_id)
+        await message.answer(f"Пользователь {user_id} удален")
 
     async def delete_dish(self, callback: CallbackQuery) -> None:
         dish_id = int(callback.data.split("_")[1])

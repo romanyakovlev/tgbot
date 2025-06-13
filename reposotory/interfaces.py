@@ -11,7 +11,18 @@ class AbstractDishRepository(ABC):
         pass
 
     @abstractmethod
-    async def add_user(self, user_id: int) -> None:
+    async def add_user(
+        self, user_id: int, username: str | None, is_admin: bool = False
+    ) -> None:
+        """Add a user or update their info."""
+        pass
+
+    @abstractmethod
+    async def delete_user(self, user_id: int) -> None:
+        pass
+
+    @abstractmethod
+    async def get_user(self, user_id: int) -> User | None:
         pass
 
     @abstractmethod

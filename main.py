@@ -1,4 +1,6 @@
 import asyncio
+import json
+import os
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
@@ -19,7 +21,8 @@ async def main() -> None:
 
     repository = SqlliteDishRepository(DB_FILE)
     await repository.init_db()
-    user_service = UserService(repository, bot)
+    admin_logins = json.loads(os.getenv("ADMIN_LOGINS", "[]"))
+    user_service = UserService(repository, bot, admin_logins)
     dish_service = DishService(repository)
 
     controller = TelegramDishController(dp, dish_service, user_service)

@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, Iterable
 
 from aiogram import Bot
 
@@ -8,12 +8,19 @@ from services.interfaces import AbstractUserService
 
 
 class UserService(AbstractUserService):
-    def __init__(self, repository: AbstractDishRepository, bot: Bot) -> None:
+    def __init__(
+        self,
+        repository: AbstractDishRepository,
+        bot: Bot,
+        admin_logins: Iterable[str] | None = None,
+    ) -> None:
         self.repository = repository
         self.bot = bot
+        self.admin_logins = set(admin_logins or [])
 
-    async def add_user_if_needed(self, user_id: int) -> None:
-        await self.repository.add_user(user_id)
+    async def add_user_if_needed(self, user_id: int, username: str | None) -> None:
+        is_admin = username in self.admin_logins if username else False
+        await self.repository.add_user(user_id, username, is_admin)
 
     async def get_users(self) -> Sequence[User]:
         return await self.repository.get_users()
@@ -29,3 +36,10 @@ class UserService(AbstractUserService):
                 print(
                     f"Не удалось отправить сообщение пользователю {user.user_id}: {e}"
                 )
+
+    async def delete_user(self, user_id: int) -> None:
+        await self.repository.delete_user(user_id)
+
+    async def is_admin(self, user_id: int) -> bool:
+        user = await self.repository.get_user(user_id)
+        return bool(user and user.admin)
