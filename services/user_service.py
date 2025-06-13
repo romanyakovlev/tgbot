@@ -3,14 +3,14 @@ from typing import Sequence, Iterable
 from aiogram import Bot
 
 from models.user import User
-from reposotory.interfaces import AbstractDishRepository
+from reposotory.interfaces import AbstractUserRepository
 from services.interfaces import AbstractUserService
 
 
 class UserService(AbstractUserService):
     def __init__(
         self,
-        repository: AbstractDishRepository,
+        repository: AbstractUserRepository,
         bot: Bot,
         admin_logins: Iterable[str] | None = None,
     ) -> None:
