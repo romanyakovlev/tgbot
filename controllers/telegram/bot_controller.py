@@ -72,7 +72,7 @@ class TelegramBotController:
             await message.answer("Пожалуйста, введите корректное название.")
             return
         await self.dish_service.add_dish(dish_name, message.from_user.id)
-        await self.user_service.notify_users(
+        await self.notify_users(
             f"\U0001F37D Добавлено новое блюдо: <b>{dish_name}</b>",
             exclude_user_id=message.from_user.id,
         )
@@ -143,3 +143,15 @@ class TelegramBotController:
         await callback.message.answer("Введите название нового блюда:", reply_markup=kb)
         await state.set_state(AddDish.waiting_for_name)
         await callback.answer()
+
+    async def notify_users(self, message: str, exclude_user_id: int | None = None) -> None:
+        users = await self.user_service.get_users()
+        for user in users:
+            if exclude_user_id is not None and user.user_id == exclude_user_id:
+                continue
+            try:
+                await self.dp.bot.send_message(user.user_id, message)
+            except Exception as e:
+                print(
+                    f"Не удалось отправить сообщение пользователю {user.user_id}: {e}"
+                )

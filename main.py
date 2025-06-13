@@ -25,7 +25,7 @@ async def main() -> None:
     await dish_repo.init_db()
     await user_repo.init_db()
     admin_logins = json.loads(os.getenv("ADMIN_LOGINS", "[]"))
-    user_service = UserService(user_repo, bot)
+    user_service = UserService(user_repo)
     for admin_id in admin_logins:
         try:
             user_id = int(admin_id)

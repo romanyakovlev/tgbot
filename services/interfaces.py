@@ -31,10 +31,6 @@ class AbstractUserService(ABC):
         pass
 
     @abstractmethod
-    async def notify_users(self, message: str, exclude_user_id: int | None = None) -> None:
-        pass
-
-    @abstractmethod
     async def delete_user(self, user_id: int) -> None:
         pass
 
