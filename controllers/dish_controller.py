@@ -1,0 +1,102 @@
+from aiogram import F, Dispatcher
+from aiogram.types import (
+    Message,
+    ReplyKeyboardMarkup,
+    KeyboardButton,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+    CallbackQuery,
+)
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.context import FSMContext
+
+from services.dish_service import DishService
+from services.user_service import UserService
+
+
+class AddDish(StatesGroup):
+    waiting_for_name = State()
+
+
+def register_handlers(dp: Dispatcher, dish_service: DishService, user_service: UserService) -> None:
+    @dp.message()
+    async def track_user(message: Message, state: FSMContext) -> None:
+        await user_service.add_user_if_needed(message.from_user.id)
+        current_state = await state.get_state()
+        if current_state == AddDish.waiting_for_name.state:
+            await receive_dish_name(message, state)
+            return
+        if message.text == "/start":
+            await cmd_start(message)
+        elif message.text and message.text.lower() == "добавить блюдо":
+            await ask_for_dish_name(message, state)
+        elif message.text and message.text.lower() == "отмена":
+            await cancel_add(message, state)
+        elif message.text and message.text.lower() == "список блюд":
+            await show_dishes(message)
+
+    async def cmd_start(message: Message) -> None:
+        kb = ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[
+            [KeyboardButton(text="Добавить блюдо")],
+            [KeyboardButton(text="Список блюд")],
+        ])
+        await message.answer("Привет! Я бот для хранения списка блюд.", reply_markup=kb)
+
+    async def ask_for_dish_name(message: Message, state: FSMContext) -> None:
+        kb = ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[[KeyboardButton(text="Отмена")]])
+        await message.answer("Введите название блюда:", reply_markup=kb)
+        await state.set_state(AddDish.waiting_for_name)
+
+    async def cancel_add(message: Message, state: FSMContext) -> None:
+        if await state.get_state() is not None:
+            await state.clear()
+            kb = ReplyKeyboardMarkup(
+                resize_keyboard=True,
+                keyboard=[[KeyboardButton(text="Добавить блюдо")], [KeyboardButton(text="Список блюд")]],
+            )
+            await message.answer("Добавление отменено.", reply_markup=kb)
+        else:
+            await message.answer("Нечего отменять.")
+
+    async def receive_dish_name(message: Message, state: FSMContext) -> None:
+        dish_name = message.text.strip()
+        if not dish_name:
+            await message.answer("Пожалуйста, введите корректное название.")
+            return
+        await dish_service.add_dish(dish_name, message.from_user.id)
+        kb = ReplyKeyboardMarkup(
+            resize_keyboard=True,
+            keyboard=[[KeyboardButton(text="Добавить блюдо")], [KeyboardButton(text="Список блюд")]],
+        )
+        await message.answer(f"Блюдо <b>{dish_name}</b> добавлено!", reply_markup=kb)
+        await state.clear()
+
+    async def show_dishes(message: Message) -> None:
+        rows = await dish_service.get_dishes()
+        if not rows:
+            await message.answer("Список блюд пуст.")
+            return
+        for dish_id, dish_name in rows:
+            kb = InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [
+                        InlineKeyboardButton(text="Удалить", callback_data=f"delete_{dish_id}"),
+                        InlineKeyboardButton(text="\u2795 Добавить", callback_data="add_dish_inline"),
+                    ]
+                ]
+            )
+            await message.answer(f"{dish_id}. {dish_name}", reply_markup=kb)
+
+    @dp.callback_query(F.data.startswith("delete_"))
+    async def delete_dish(callback: CallbackQuery) -> None:
+        dish_id = int(callback.data.split("_")[1])
+        await dish_service.delete_dish(dish_id)
+        await callback.message.edit_text("Блюдо удалено \u2705")
+        await callback.answer("Удалено!")
+
+    @dp.callback_query(F.data == "add_dish_inline")
+    async def inline_add_dish(callback: CallbackQuery, state: FSMContext) -> None:
+        kb = ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[[KeyboardButton(text="Отмена")]])
+        await callback.message.answer("Введите название нового блюда:", reply_markup=kb)
+        await state.set_state(AddDish.waiting_for_name)
+        await callback.answer()
