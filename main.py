@@ -20,7 +20,7 @@ async def main() -> None:
     repository = SqlliteDishRepository(DB_FILE)
     await repository.init_db()
     user_service = UserService(repository, bot)
-    dish_service = DishService(repository, user_service)
+    dish_service = DishService(repository)
 
     controller = TelegramDishController(dp, dish_service, user_service)
     controller.register_handlers()

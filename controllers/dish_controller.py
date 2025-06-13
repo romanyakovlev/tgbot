@@ -66,6 +66,10 @@ class TelegramDishController:
             await message.answer("Пожалуйста, введите корректное название.")
             return
         await self.dish_service.add_dish(dish_name, message.from_user.id)
+        await self.user_service.notify_users(
+            f"\U0001F37D Добавлено новое блюдо: <b>{dish_name}</b>",
+            exclude_user_id=message.from_user.id,
+        )
         kb = ReplyKeyboardMarkup(resize_keyboard=True, keyboard=[[KeyboardButton(text="Добавить блюдо")], [KeyboardButton(text="Список блюд")]])
         await message.answer(f"Блюдо <b>{dish_name}</b> добавлено!", reply_markup=kb)
         await state.clear()
