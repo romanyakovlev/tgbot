@@ -25,7 +25,13 @@ async def main() -> None:
     await dish_repo.init_db()
     await user_repo.init_db()
     admin_logins = json.loads(os.getenv("ADMIN_LOGINS", "[]"))
-    user_service = UserService(user_repo, bot, admin_logins)
+    user_service = UserService(user_repo, bot)
+    for admin_id in admin_logins:
+        try:
+            user_id = int(admin_id)
+        except (TypeError, ValueError):
+            continue
+        await user_service.add_user_if_needed(user_id, None, is_admin=True)
     dish_service = DishService(dish_repo)
 
     controller = TelegramBotController(dp, dish_service, user_service)

@@ -1,4 +1,4 @@
-from typing import Sequence, Iterable
+from typing import Sequence
 
 from aiogram import Bot
 
@@ -8,18 +8,16 @@ from services.interfaces import AbstractUserService
 
 
 class UserService(AbstractUserService):
-    def __init__(
-        self,
-        repository: AbstractUserRepository,
-        bot: Bot,
-        admin_logins: Iterable[str] | None = None,
-    ) -> None:
+    def __init__(self, repository: AbstractUserRepository, bot: Bot) -> None:
         self.repository = repository
         self.bot = bot
-        self.admin_logins = set(admin_logins or [])
 
-    async def add_user_if_needed(self, user_id: int, username: str | None) -> None:
-        is_admin = username in self.admin_logins if username else False
+    async def add_user_if_needed(
+        self, user_id: int, username: str | None, is_admin: bool = False
+    ) -> None:
+        existing = await self.repository.get_user(user_id)
+        if existing is not None:
+            is_admin = existing.admin or is_admin
         await self.repository.add_user(user_id, username, is_admin)
 
     async def get_users(self) -> Sequence[User]:

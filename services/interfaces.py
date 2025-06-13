@@ -21,7 +21,9 @@ class AbstractDishService(ABC):
 
 class AbstractUserService(ABC):
     @abstractmethod
-    async def add_user_if_needed(self, user_id: int, username: str | None) -> None:
+    async def add_user_if_needed(
+        self, user_id: int, username: str | None, is_admin: bool = False
+    ) -> None:
         pass
 
     @abstractmethod
