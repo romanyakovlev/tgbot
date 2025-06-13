@@ -17,7 +17,7 @@ class AddDish(StatesGroup):
     waiting_for_name = State()
 
 
-class TelegramDishController:
+class TelegramBotController:
     def __init__(self, dp: Dispatcher, dish_service: AbstractDishService, user_service: AbstractUserService) -> None:
         self.dp = dp
         self.dish_service = dish_service

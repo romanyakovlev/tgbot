@@ -6,7 +6,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
-from telegram.controllers.dish_controller import TelegramDishController
+from telegram.controllers.bot_controller import TelegramBotController
 from reposotory.sqlite.sqllite_dish_repository import SqlliteDishRepository
 from reposotory.sqlite.sqllite_user_repository import SqlliteUserRepository
 from services.dish_service import DishService
@@ -28,7 +28,7 @@ async def main() -> None:
     user_service = UserService(user_repo, bot, admin_logins)
     dish_service = DishService(dish_repo)
 
-    controller = TelegramDishController(dp, dish_service, user_service)
+    controller = TelegramBotController(dp, dish_service, user_service)
     controller.register_handlers()
     await dp.start_polling(bot)
 
