@@ -1,10 +1,11 @@
 from aiogram import Bot
 
-from reposotory.dish_repository import DishRepository
+from reposotory.interfaces import AbstractDishRepository
+from services.interfaces import AbstractUserService
 
 
-class UserService:
-    def __init__(self, repository: DishRepository, bot: Bot) -> None:
+class UserService(AbstractUserService):
+    def __init__(self, repository: AbstractDishRepository, bot: Bot) -> None:
         self.repository = repository
         self.bot = bot
 

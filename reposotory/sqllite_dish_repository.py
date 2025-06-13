@@ -1,7 +1,9 @@
 import aiosqlite
 
+from .interfaces import AbstractDishRepository
 
-class DishRepository:
+
+class SqlliteDishRepository(AbstractDishRepository):
     def __init__(self, db_file: str):
         self.db_file = db_file
 

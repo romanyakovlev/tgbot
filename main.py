@@ -5,7 +5,7 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from controllers.dish_controller import TelegramDishController
-from reposotory.dish_repository import DishRepository
+from reposotory.sqllite_dish_repository import SqlliteDishRepository
 from services.dish_service import DishService
 from services.user_service import UserService
 
@@ -17,7 +17,7 @@ async def main() -> None:
     bot = Bot(token=API_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher(storage=MemoryStorage())
 
-    repository = DishRepository(DB_FILE)
+    repository = SqlliteDishRepository(DB_FILE)
     await repository.init_db()
     user_service = UserService(repository, bot)
     dish_service = DishService(repository, user_service)

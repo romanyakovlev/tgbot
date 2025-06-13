@@ -1,9 +1,9 @@
-from reposotory.dish_repository import DishRepository
-from services.user_service import UserService
+from reposotory.interfaces import AbstractDishRepository
+from services.interfaces import AbstractUserService, AbstractDishService
 
 
-class DishService:
-    def __init__(self, repository: DishRepository, user_service: UserService) -> None:
+class DishService(AbstractDishService):
+    def __init__(self, repository: AbstractDishRepository, user_service: AbstractUserService) -> None:
         self.repository = repository
         self.user_service = user_service
 

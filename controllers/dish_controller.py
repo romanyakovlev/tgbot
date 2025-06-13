@@ -10,8 +10,7 @@ from aiogram.types import (
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 
-from services.dish_service import DishService
-from services.user_service import UserService
+from services.interfaces import AbstractDishService, AbstractUserService
 
 
 class AddDish(StatesGroup):
@@ -19,7 +18,7 @@ class AddDish(StatesGroup):
 
 
 class TelegramDishController:
-    def __init__(self, dp: Dispatcher, dish_service: DishService, user_service: UserService) -> None:
+    def __init__(self, dp: Dispatcher, dish_service: AbstractDishService, user_service: AbstractUserService) -> None:
         self.dp = dp
         self.dish_service = dish_service
         self.user_service = user_service
